@@ -1,0 +1,12 @@
+crcaguilerapo
+dafguerreroal
+
+Para el correcto funcionamiento del programa, se debe compilar y ejecutar incialmente el programa "creador", el cual generará las estructuras aleatorias sobre las cuales se ejecutará el servidor. Dicho programa se podrá encontrar en la carpeta "bin". Allí se generarán todos los archivos necesarios para el correcto funcionamiento de la conexión cliente-servidor.
+
+Como segunda medida, se deberá ejecutar el Makefile, el cual compilará los programas p2-dogServer.c y p2-dogClient.c que se encuentran en la carpeta src. Los ejecutables de estos programas, se generarán en la carpeta bin.
+
+Una vez compilados los programas, se puede proceder a la ejecución de los mismos escribiendo los respectivos comandos por consola.
+
+La carpeta doc, contiene el documento Manual de Usuario el cual contiene tanto el manual para el uso correcto de los programas, como tambien los diagramas de bloque y diagramas de comunicación que representan la relacion de conexión entre creador, servidor y cliente.
+
+
