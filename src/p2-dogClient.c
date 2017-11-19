@@ -164,10 +164,16 @@ void main() {
 		scanf("%i", &opc);
 		fflush(stdin);
 
-		r = send(clientfd, &opc, sizeof(opc), 0);
+		if (opc > 4 || opc < 1) {
+
+		} else {
+			r = send(clientfd, &opc, sizeof(opc), 0);
+		}
+		
 		if(r != sizeof(int)){perror("error enviando");}
 
 		if (opc == 1) {
+			//Ingresar Registro
 			int confirmacion = 0;
 			struct dogType *mascota = agregar();
 			send(clientfd, mascota, sizeof(struct dogType), 0);
@@ -206,6 +212,7 @@ void main() {
 				printf("El registro fue borrado\n");
 
 			} else {
+				//Recibir Informacion de mascota
 				recv(clientfd, nombreHistorial, sizeof(char)*14, MSG_WAITALL);
 				recv(clientfd, &sz, sizeof(int), MSG_WAITALL);
 				//printf("%s\n", nombreHistorial);
@@ -221,10 +228,11 @@ void main() {
 				
 				strncat(abrirHistorial, nombreHistorial, 14);
 				//printf("%s\n", abrirHistorial);
+				//Se muestra el archivo automaticamente
 				system(abrirHistorial);
 	
+				//Leer las actualizaciones y enviarlas al servidor
 				file = fopen(nombreHistorial, "r");
-	
 	
 				fseek(file, 0L, SEEK_END);
 				sz = ftell(file);
@@ -244,6 +252,7 @@ void main() {
 			continuar2();
 
 		} else if (opc == 3) {
+			//Borrar Registro
 			long registros, numRegistro;
 			int confirmacion = 0;
 
@@ -268,6 +277,7 @@ void main() {
 			continuar2();	     	
 
 		} else if (opc == 4) {
+			//Buscar Registro
 			char nombre[32];
 			int confirmacion = 0;;
 			struct dogType mascota;
@@ -295,6 +305,7 @@ void main() {
 				if (mascota.nombre[0] == '\0') {
 					break;
 				}
+				//Imprimimos mascota
 				printf("%s %i","NR: ", pos);
 				printf("%s %i %s %s %s %i %s %i %0.2f %c\n", "\nID: ",
 													mascota.id, " \n", mascota.nombre, mascota.tipo, 

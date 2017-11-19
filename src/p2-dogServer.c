@@ -224,12 +224,12 @@ void buscarHash(char nombre[32], int clientfd) {
 			
 			
             while(nodo != NULL) {
-
+            	//Nos ubicamos en la posicion del archivo correspondiente a la lista donde se encunetra el nombre solicitado
             	fseek (file, nodo->posicion, SEEK_SET);
 				fread(&auxiliar, sizeof(struct dogType), 1, file); 
 
 				pos = (((nodo->posicion)/100)+1);
-                
+                //Se mira si el nombre coincide y no ha sido borrado.
                	if ((strcmp(nombre, auxiliar.nombre) == 0) && (nodo->borrado != 'b')) {
                		
 					contador++;
@@ -328,11 +328,13 @@ void verHistorial(int clientfd, long numRegistro){
 		sprintf(nombreHistorial1, "%d", id);
 		strncat(nombreHistorial1, ".txt", 4);
 		strncat(nombreHistorial, nombreHistorial1, 14);
+		//Se crea el nombre del archivo historial para la mascota en cuestion. (nombreHistorial)
 	
 		FILE *archivo;
 		int sz;
 		int caracter;
 		
+		//Leer datos de historial para enviar al cliente.
 		archivo = fopen(nombreHistorial,"r");
 	
 		if (archivo == NULL) {
@@ -355,6 +357,7 @@ void verHistorial(int clientfd, long numRegistro){
 		fclose(archivo);
 		sz = 0;
 		
+		//Abrir el archivo para guardar las actualizaciones.
 		archivo = fopen(nombreHistorial,"w");
 	
 		recv(clientfd, &sz, sizeof(int), 0);
@@ -366,14 +369,18 @@ void verHistorial(int clientfd, long numRegistro){
 		}
 		
 		fclose(archivo);
+
+		//Leemos actualizaciones
 		archivo = fopen(nombreHistorial,"r");
 
 		fscanf(archivo, "%s %s %i %s %i %f %c", auxiliar.nombre, auxiliar.tipo, &auxiliar.edad,auxiliar.raza, &auxiliar.estatura, &auxiliar.peso,&auxiliar.sexo);
 		
 		fclose(archivo);
 
+		//Guardamos las actualziaciones en dataDgos.
 		file = fopen(nombreArchivo,"r+");
 		
+		//manejo de concurrencia con Mutex
 		pthread_mutex_lock(&mutex);
 		//Sobreescribe las estructura en el archivo.
 		fseek (file,(numRegistro-1)*sizeof(struct dogType), SEEK_SET);
@@ -427,9 +434,11 @@ void verRegistro(int clientfd, long numeroRegistro) {
 struct dogType vaciarEstructura(long numeroRegistro) {
 
 	FILE *file;
+	//Se llena la estrucutura de vacios.
 	struct dogType auxiliar = {0, '\0', '\0', 0, '\0', 0, 0, '\0'};
 	struct dogType auxiliar2;
 
+	//Se guarda esa estrucutura vacia sobre la existente.
 	file = fopen(nombreArchivo, "r+");
 	fseek (file,(numeroRegistro-1)*sizeof(struct dogType), SEEK_SET);
 	fread(&auxiliar2, sizeof(struct dogType), 1, file);
@@ -505,6 +514,7 @@ void menu(int clientfd, struct sockaddr_in client, char ip[32]) {
 	recv(clientfd,&opc, sizeof(int), MSG_WAITALL);
 
 	if (opc == 1) {
+		//Ingresar Mascota
 		log1(ip, opc, " ... ");
 		struct dogType *nuevo;
 		nuevo = malloc(sizeof(struct dogType));
@@ -514,10 +524,13 @@ void menu(int clientfd, struct sockaddr_in client, char ip[32]) {
 			exit(-1);	
 		}
 
+		//Recibe la nueva mascota
 		recv(clientfd, nuevo, sizeof(struct dogType), MSG_WAITALL);
 
+		//Manejo de concurrencia con tuberia
      	r = read(pipefd[0], &buffer, 1);
 
+     	//Ingresa los datos en archivo y hash
      	crearRegistro(nuevo);
 
      	r = write(pipefd[1], "T", 1);
@@ -534,6 +547,7 @@ void menu(int clientfd, struct sockaddr_in client, char ip[32]) {
      	system("clear");
 	    
 	} else if (opc == 2) {
+		//Ver Registro
 		int numeroReg;
 		char numreg[32];
 		send(clientfd, &cantidadMascotasTotal, sizeof(long), 0);
@@ -545,6 +559,7 @@ void menu(int clientfd, struct sockaddr_in client, char ip[32]) {
 
 		menu(clientfd, client, ip);
 	} else if (opc == 3) {
+		//Borrar Registro
 		long numRegistro;
 		int confirmacion = 1;
 		char numreg[32];
@@ -564,6 +579,7 @@ void menu(int clientfd, struct sockaddr_in client, char ip[32]) {
 	    system("clear");
 		cantidadMascotasTotal--;
 		
+		//Borrado del archivo historial correspondiente
 		id  = mascota.id;
 		sprintf(nombreHistorial, "%d", id);
 		strncat(nombreHistorial, ".txt", 4);
@@ -578,6 +594,7 @@ void menu(int clientfd, struct sockaddr_in client, char ip[32]) {
 
 	    menu(clientfd, client, ip);
 	} else if (opc == 4) {
+		//Buscar Registro
 		int confirmacion = 1;
 		char nombre[32];
 		recv(clientfd, &nombre, 33, MSG_WAITALL);
@@ -676,6 +693,7 @@ int main(){
 
 	cantidadMascotasTotal = cantidadMascotasArchivo(nombreArchivo);
 
+	//Inicializar todos los espacios de la Hash en Null
 	printf("%s\n", "Cargando Datos ... ");
 	for (int i = 0; i < 3000; ++i) {
 		hashTable[i] = NULL;
@@ -683,6 +701,7 @@ int main(){
 
 	fileHash2 = fopen(nombreArchivo,"r");
 	
+	//Asignado en Hash
 	for (int j = 0; j < 10000000; j++) {
 		struct dogType *mascota = malloc(sizeof(struct dogType));
 		struct identificador *id = malloc(sizeof(struct identificador));
