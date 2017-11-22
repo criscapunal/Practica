@@ -148,7 +148,7 @@ long cantidadMascotasArchivo2(char archivo[32]){
 
 //Nodo de la Hash
 struct Nodo {
-	int posicion;
+	int posicion; 
 	char borrado;
 	struct Nodo *next; 
 };
@@ -160,7 +160,7 @@ int getHash(char nombre[32]){
 	int i = 0; 
 	int indexHash = 0;
     int tamNombre = strlen(nombre);
-    char auxNombre[tamNombre+1];
+    char auxNombre[tamNombre+1];  
 
     for ( i=0; nombre[i]; i++) {
        auxNombre[i] = toupper(nombre[i]);
