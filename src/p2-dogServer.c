@@ -311,6 +311,9 @@ void verHistorial(int clientfd, long numRegistro){
 	int id;
 	int borrado;
 	//Lee estrutura de archivo y guarda en auxiliar.
+	
+
+
 	file = fopen(nombreArchivo,"r+");
 	fseek (file,(numRegistro-1)*sizeof(struct dogType), SEEK_SET);
 	fread(&auxiliar, sizeof(struct dogType), 1, file); 
@@ -378,15 +381,15 @@ void verHistorial(int clientfd, long numRegistro){
 		fclose(archivo);
 
 		//Guardamos las actualziaciones en dataDgos.
-		file = fopen(nombreArchivo,"r+");
 		
-		//manejo de concurrencia con Mutex
-		pthread_mutex_lock(&mutex);
+		
+		
+		file = fopen(nombreArchivo,"r+");
 		//Sobreescribe las estructura en el archivo.
 		fseek (file,(numRegistro-1)*sizeof(struct dogType), SEEK_SET);
 		fwrite(&auxiliar, sizeof(struct dogType), 1, file);
 		fclose(file);
-		pthread_mutex_unlock(&mutex);
+		
 	}
 	
 
@@ -553,7 +556,14 @@ void menu(int clientfd, struct sockaddr_in client, char ip[32]) {
 		send(clientfd, &cantidadMascotasTotal, sizeof(long), 0);
 
 		recv(clientfd, &numeroReg, sizeof(long), MSG_WAITALL);
+
+		//manejo de concurrencia con Mutex
+		pthread_mutex_lock(&mutex);
+
 		verHistorial(clientfd, numeroReg);
+
+		pthread_mutex_unlock(&mutex);
+		
 		sprintf(numreg, "%i", numeroReg);
 		log1(ip, opc, numreg);
 
